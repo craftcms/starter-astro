@@ -17,12 +17,12 @@ corepack_enable: false
 upload_dirs:
   - uploads
 web_extra_exposed_ports:
-  - name: next
-    container_port: 3000
-    http_port: 3000
-    https_port: 3001
+  - name: astro
+    container_port: 4321
+    http_port: 4321
+    https_port: 4322
 web_environment:
-  - VIRTUAL_HOST=starter-astro.ddev.site,api.starter-astro.ddev.site
+  - VIRTUAL_HOST=api.starter-astro.ddev.site,starter-astro.ddev.site
   - CRAFT_CMD_ROOT=/var/www/html/backend
 
 # Key features of DDEV's config.yaml:
@@ -288,3 +288,8 @@ web_environment:
 # information on the commands that can be extended and the tasks you can define
 # for them. Example:
 #hooks:
+
+web_extra_daemons:
+  - name: "astro"
+    command: "cd /var/www/html/frontend && npm run dev -- --host 0.0.0.0"
+    directory: "/var/www/html/frontend"
