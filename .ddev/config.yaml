@@ -291,5 +291,5 @@ web_environment:
 
 web_extra_daemons:
   - name: "astro"
-    command: "cd /var/www/html/frontend && npm run dev -- --host 0.0.0.0"
+    command: "cd /var/www/html/frontend && npm run dev -- --host"
     directory: "/var/www/html/frontend"
