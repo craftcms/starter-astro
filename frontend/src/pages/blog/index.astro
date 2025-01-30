@@ -1,0 +1,31 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { craftClient } from '../../lib/craft';
+
+const query = `
+  query GetBlogPosts {
+    entries(section: "blog") {
+      id
+      title
+      uri
+      ... on blog_blog_Entry {
+        summary
+      }
+    }
+  }
+`;
+
+const { entries } = await craftClient.query(query);
+---
+
+<Layout title="Blog">
+  <div>
+    {entries.map((post) => (
+      <article>
+        <h2>{post.title}</h2>
+        <p>{post.summary}</p>
+        <a href={`/${post.uri}`}>Read more</a>
+      </article>
+    ))}
+  </div>
+</Layout>
