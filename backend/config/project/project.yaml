@@ -1,4 +1,4 @@
-dateModified: 1734323885
+dateModified: 1738557103
 elementSources:
   craft\elements\Entry:
     -
@@ -176,5 +176,5 @@ system:
   live: true
   name: 'Astro Starter'
   retryDuration: null
-  schemaVersion: 5.5.0.0
+  schemaVersion: 5.6.0.2
   timeZone: America/Los_Angeles
