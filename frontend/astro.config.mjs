@@ -7,7 +7,18 @@ export default defineConfig({
     port: 4321,
     host: true
   },
-  site: 'https://starter-astro.ddev.site',
   integrations: [vue()],
-  output: 'server'
+  output: 'server',
+  vite: {
+    server: {
+      hmr: {
+        protocol: 'ws'  // Use WebSocket protocol
+      },
+      host: '0.0.0.0',
+      strictPort: true,
+      cors: true,
+      origin: 'https://starter-astro.ddev.site',
+      allowedHosts: ['starter-astro.ddev.site', '.ddev.site']
+    }
+  }
 });
