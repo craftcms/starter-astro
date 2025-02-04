@@ -1,29 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PreviewWrapper from '../components/PreviewWrapper';
+import HomeContent from '../components/HomeContent';
 import { craftClient } from '../lib/craft';
 import { HOME_QUERY } from '../queries/home.mjs';
+import { getPreviewStatus } from '../lib/preview';
+
+const { isPreview, previewToken } = getPreviewStatus(Astro.url);
 
 let pageData = null;
 let error = null;
-let schemaTypes = null;
 
 try {
-  // First test the connection with a schema query
-  const schemaQuery = `
-    query {
-      __schema {
-        types {
-          name
-        }
-      }
-    }
-  `;
-  
-  const schemaResponse = await craftClient.query(schemaQuery);
-  schemaTypes = schemaResponse.__schema.types;
-  console.log('Available types:', schemaTypes.map(t => t.name));
-
-  // Then try the home query
   const response = await craftClient.query(HOME_QUERY);
   pageData = response.entry;
 } catch (e) {
@@ -36,35 +24,16 @@ try {
   {error && (
     <div class="error-message">
       <p>Error loading page: {error}</p>
-      {schemaTypes && (
-        <div>
-          <p>Available types:</p>
-          <pre>{JSON.stringify(schemaTypes, null, 2)}</pre>
-        </div>
-      )}
     </div>
   )}
 
-  {pageData && (
-    <div class="home-content">
-      <h1>{pageData.title}</h1>
-      
-      {pageData.pageSubheading && (
-        <h2>{pageData.pageSubheading}</h2>
-      )}
-
-      {pageData.image && (
-        <img 
-          src={pageData.image.url} 
-          alt={pageData.image.alt || ''} 
-          class="hero-image"
-        />
-      )}
-
-      {pageData.pageContent && (
-        <div class="content" set:html={pageData.pageContent} />
-      )}
-    </div>
+  {isPreview ? (
+    <PreviewWrapper 
+      client:only="react"
+      query={HOME_QUERY}
+    />
+  ) : (
+    <HomeContent client:load data={pageData} />
   )}
 </Layout>
 
@@ -77,19 +46,20 @@ try {
     border-radius: 4px;
   }
 
-  .home-content {
+  :global(.home-content) {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
   }
 
-  .hero-image {
+  :global(.hero-image) {
     width: 100%;
     height: auto;
     margin: 2rem 0;
   }
 
-  .content {
+  :global(.content) {
     margin-top: 2rem;
   }
 </style>
+

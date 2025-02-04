@@ -3,7 +3,6 @@ export class GraphQLClient {
     this.craftUrl = craftUrl;
     this.token = token;
     
-    // Debug info
     console.log('GraphQL Client initialized with:', {
       url: this.craftUrl,
       hasToken: !!this.token
@@ -26,12 +25,11 @@ export class GraphQLClient {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
 
-      // Add preview token if provided
       if (options.previewToken) {
         headers['X-Craft-Token'] = options.previewToken;
+        headers['X-Craft-Live-Preview'] = '1';
       }
 
-      // Log the full request details
       console.log('Full GraphQL Request:', {
         url: this.craftUrl,
         headers,
