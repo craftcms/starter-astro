@@ -1,5 +1,5 @@
 ---
-import { GraphQLClient } from '../lib/graphql';
+import { craftClient } from '../lib/craft';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Navigation from '../components/Navigation.vue';
@@ -8,27 +8,19 @@ import Navigation from '../components/Navigation.vue';
 const currentPath = Astro.url.pathname;
 const isPreview = import.meta.env.DEV || Astro.url.searchParams.has('preview');
 
-// Initialize GraphQL client with proper URL string
-const client = new GraphQLClient({
-	craftUrl: import.meta.env.PUBLIC_GQL_HOST,
-	token: import.meta.env.PUBLIC_GRAPHQL_TOKEN
-});
-
-// Fetch pages including drafts if in preview mode
-const query = `
-	query NavigationPages($status: [String]) {
-		entries(section: "pages", status: $status) {
+// Fetch pages for navigation
+const { entries: navigationPages } = await craftClient.query(`
+	query NavigationPages {
+		entries(section: "pages") {
 			id
 			uri
 			title
 			status
 		}
 	}
-`;
+`);
 
-const { entries: navigationPages } = await client.query(query, {
-	status: isPreview ? ['live', 'disabled'] : ['live']
-});
+const { title } = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -38,7 +30,7 @@ const { entries: navigationPages } = await client.query(query, {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Craft CMS + Astro Starter</title>
+		<title>{title}</title>
 	</head>
 	<body>
 		<div class="flex min-h-screen flex-col">
@@ -47,6 +39,7 @@ const { entries: navigationPages } = await client.query(query, {
 					pages={navigationPages} 
 					currentPath={currentPath}
 					isPreview={isPreview}
+					client:load
 				/>
 			</Header>
 

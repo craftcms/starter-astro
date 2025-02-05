@@ -2,51 +2,113 @@
 import Layout from '../layouts/Layout.astro';
 import { craftClient } from '../lib/craft';
 import { getPreviewStatus } from '../lib/preview';
-import { getPaginationData } from '../lib/pagination';
+import { PAGE_QUERY } from '../queries/pages';
+import { HOME_QUERY } from '../queries/home';
 
 const { slug } = Astro.params;
-const uri = Array.isArray(slug) ? slug.join('/') : slug || '';
+const uri = Array.isArray(slug) ? slug.join('/') : slug;
 const preview = getPreviewStatus(Astro.url);
 
-// If in preview mode, we'll use client-side rendering
-if (preview.isPreview) {
-  return Astro.redirect(`/preview/${uri}?token=${preview.token}`);
-}
+// Choose query based on whether this is the homepage or not
+const isHome = !uri || uri === '';
+const query = isHome ? HOME_QUERY : PAGE_QUERY;
+const variables = isHome ? {} : { uri };
 
-const { currentPage, itemsPerPage, offset, limit } = getPaginationData(Astro.url);
+console.log('Debug:', { isHome, uri, query: query.toString(), variables }); // Debug log
 
-const data = await craftClient.query(`
-  query PageEntry($uri: [String], $offset: Int, $limit: Int) {
-    entry(uri: $uri) {
-      id
-      title
-      uri
-      # ... other fields
-    }
-    totalEntries: entries(section: "pages") {
-      count
-    }
-  }
-`, {
-  uri,
-  offset,
-  limit
+const data = await craftClient.query(query, variables, {
+  preview: preview.isPreview,
+  token: preview.token
 });
 
-if (!data?.entry) {
+const entry = isHome ? data?.entry : data?.entry;
+
+if (!entry) {
+  console.log('No entry found:', data); // Debug log
   return Astro.redirect('/404');
 }
 ---
 
-<Layout title={data.entry.title}>
+<Layout title={entry.title}>
+  {preview.isPreview && (
+    <div class="preview-banner">
+      Preview Mode - <a href={`/${uri || ''}`}>Exit Preview</a>
+    </div>
+  )}
+
   <main>
-    <h1>{data.entry.title}</h1>
-    <div set:html={data.entry.content} />
-    
-    {data.totalEntries && 
-      <nav class="pagination">
-        <!-- Simple pagination controls -->
-      </nav>
-    }
+    {entry.image?.[0] && (
+      <figure>
+        <img src={entry.image[0].url} alt={entry.image[0].alt} />
+      </figure>
+    )}
+
+    <div class="container mx-auto pt-12 pb-6 px-2">
+      {entry.ancestors?.length > 0 && (
+        <ul class="mb-2 text-base text-slate-500">
+          {entry.ancestors.map((ancestor) => (
+            <li>
+              <a href={`/${ancestor.uri}`}>{ancestor.title}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h1 class="font-bold text-4xl">{entry.title}</h1>
+      {entry.pageSubheading && (
+        <p class="mt-4">{entry.pageSubheading}</p>
+      )}
+    </div>
+
+    {entry.pageContent && (
+      <div 
+        class="container mx-auto py-12 px-2 prose prose-slate lg:prose-xl"
+        set:html={entry.pageContent}
+      />
+    )}
+
+    {entry.children?.length > 0 && (
+      <div class="container mx-auto py-12 px-2">
+        <h2 class="font-bold text-3xl mb-4">Child Pages</h2>
+        <ul>
+          {entry.children.map((child) => (
+            <li>
+              <a href={`/${child.uri}`} class="text-red-600 hover:underline">
+                {child.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
   </main>
-</Layout> 
+</Layout>
+
+<style>
+  .preview-banner {
+    background: #374151;
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  .preview-banner a {
+    color: #93c5fd;
+    text-decoration: underline;
+  }
+</style>
+
+{preview.isPreview && (
+  <script>
+    // Auto-refresh preview
+    window.addEventListener('message', (event) => {
+      if (event.data === 'preview:refresh') {
+        window.location.reload();
+      }
+    });
+  </script>
+)} 
