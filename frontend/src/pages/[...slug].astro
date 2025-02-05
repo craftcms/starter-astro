@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { craftClient } from '../lib/craft';
+import { getPreviewStatus } from '../lib/preview';
+import { getPaginationData } from '../lib/pagination';
+
+const { slug } = Astro.params;
+const uri = Array.isArray(slug) ? slug.join('/') : slug || '';
+const preview = getPreviewStatus(Astro.url);
+
+// If in preview mode, we'll use client-side rendering
+if (preview.isPreview) {
+  return Astro.redirect(`/preview/${uri}?token=${preview.token}`);
+}
+
+const { currentPage, itemsPerPage, offset, limit } = getPaginationData(Astro.url);
+
+const data = await craftClient.query(`
+  query PageEntry($uri: [String], $offset: Int, $limit: Int) {
+    entry(uri: $uri) {
+      id
+      title
+      uri
+      # ... other fields
+    }
+    totalEntries: entries(section: "pages") {
+      count
+    }
+  }
+`, {
+  uri,
+  offset,
+  limit
+});
+
+if (!data?.entry) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title={data.entry.title}>
+  <main>
+    <h1>{data.entry.title}</h1>
+    <div set:html={data.entry.content} />
+    
+    {data.totalEntries && 
+      <nav class="pagination">
+        <!-- Simple pagination controls -->
+      </nav>
+    }
+  </main>
+</Layout> 

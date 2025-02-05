@@ -1,22 +1,64 @@
 ---
+import { GraphQLClient } from '../lib/graphql';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Navigation from '../components/Navigation.vue';
+
+// Pass the current path to the Navigation component
+const currentPath = Astro.url.pathname;
+const isPreview = import.meta.env.DEV || Astro.url.searchParams.has('preview');
+
+// Initialize GraphQL client with proper URL string
+const client = new GraphQLClient({
+	craftUrl: import.meta.env.PUBLIC_GQL_HOST,
+	token: import.meta.env.PUBLIC_GRAPHQL_TOKEN
+});
+
+// Fetch pages including drafts if in preview mode
+const query = `
+	query NavigationPages($status: [String]) {
+		entries(section: "pages", status: $status) {
+			id
+			uri
+			title
+			status
+		}
+	}
+`;
+
+const { entries: navigationPages } = await client.query(query, {
+	status: isPreview ? ['live', 'disabled'] : ['live']
+});
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>Craft CMS + Astro Starter</title>
 	</head>
 	<body>
-		<Header />
-		<main class="page min-h-screen" id="main" tabindex="-1">
-			<slot />
-		</main>
-		<Footer />
+		<div class="flex min-h-screen flex-col">
+			<Header>
+				<Navigation 
+					pages={navigationPages} 
+					currentPath={currentPath}
+					isPreview={isPreview}
+				/>
+			</Header>
+
+			<main class="grow">
+				<slot />
+			</main>
+
+			<Footer />
+		</div>
 	</body>
 </html>
+
+<style is:global>
+	/* Your global styles here */
+</style>

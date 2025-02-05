@@ -1,0 +1,74 @@
+---
+import { Image } from 'astro:assets';
+
+const { pageData = {} } = Astro.props;
+const {
+  title,
+  pageSubheading,
+  pageContent,
+  image,
+  ancestors,
+  children
+} = pageData;
+---
+
+<div>
+  {/* Hero Image */}
+  {image?.length > 0 && (
+    <figure>
+      <Image 
+        src={image[0].url}
+        alt={image[0].alt || ''}
+        width={image[0].width || 1200}
+        height={image[0].height || 600}
+      />
+    </figure>
+  )}
+
+  <header class="container mx-auto pt-12 pb-6 px-2 text-2xl">
+    {ancestors?.length > 0 && (
+      <ul class="mb-2 text-base text-slate-500">
+        {ancestors.map((ancestor) => (
+          <li>
+            <a href={`/${ancestor.uri}`}>{ancestor.title}</a>
+          </li>
+        ))}
+      </ul>
+    )}
+    {title && (
+      <h1 class="font-bold text-4xl sm:text-6xl lg:text-9xl">
+        {title}
+      </h1>
+    )}
+    {pageSubheading && (
+      <p class="mt-4">{pageSubheading}</p>
+    )}
+  </header>
+
+  {pageContent && (
+    <section class="page__content">
+      <div 
+        class="container mx-auto py-12 px-2 text-balance prose prose-slate lg:prose-xl"
+        set:html={pageContent}
+      />
+    </section>
+  )}
+  
+  {children && children.length > 0 && (
+    <footer>
+      <div class="container mx-auto py-12 px-2">
+        <h3 class="font-bold text-3xl mb-4">Children</h3>
+        <ul>
+          {children.map((child) => (
+            <li>
+              <span class="text-slate-400 mr-2" aria-hidden="true">&rarr;</span>
+              <a href={`/${child.uri}`} class="text-red-600 hover:underline">
+                {child.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </footer>
+  )}
+</div>

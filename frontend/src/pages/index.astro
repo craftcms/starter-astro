@@ -1,65 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PreviewWrapper from '../components/PreviewWrapper';
-import HomeContent from '../components/HomeContent';
+import Content from '../components/Content.astro';
 import { craftClient } from '../lib/craft';
 import { HOME_QUERY } from '../queries/home.mjs';
-import { getPreviewStatus } from '../lib/preview';
 
-const { isPreview, previewToken } = getPreviewStatus(Astro.url);
+export const prerender = true;
 
-let pageData = null;
-let error = null;
+const data = await craftClient.query(HOME_QUERY);
+const transformedData = data?.entry || null;
 
-try {
-  const response = await craftClient.query(HOME_QUERY);
-  pageData = response.entry;
-} catch (e) {
-  console.error('Error fetching data:', e);
-  error = e.message;
+if (!transformedData) {
+  return Astro.redirect('/404');
 }
 ---
 
-<Layout title={pageData?.title || 'Home'}>
-  {error && (
-    <div class="error-message">
-      <p>Error loading page: {error}</p>
-    </div>
-  )}
-
-  {isPreview ? (
-    <PreviewWrapper 
-      client:only="react"
-      query={HOME_QUERY}
-    />
-  ) : (
-    <HomeContent client:load data={pageData} />
-  )}
+<Layout>
+  <Content pageData={transformedData} />
 </Layout>
-
-<style>
-  .error-message {
-    color: red;
-    padding: 1rem;
-    margin: 1rem 0;
-    border: 1px solid red;
-    border-radius: 4px;
-  }
-
-  :global(.home-content) {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  :global(.hero-image) {
-    width: 100%;
-    height: auto;
-    margin: 2rem 0;
-  }
-
-  :global(.content) {
-    margin-top: 2rem;
-  }
-</style>
-
