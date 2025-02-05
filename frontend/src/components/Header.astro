@@ -1,6 +1,23 @@
 ---
+import { craftClient } from '../lib/craft';
 import Logo from './Logo.astro';
+import Navigation from './Navigation.vue';
 
+// Get current path and preview status
+const currentPath = Astro.url.pathname;
+const isPreview = import.meta.env.DEV || Astro.url.searchParams.has('preview');
+
+// Fetch pages for navigation
+const { entries: navigationPages } = await craftClient.query(`
+  query NavigationPages {
+    entries(section: "pages") {
+      id
+      uri
+      title
+      status
+    }
+  }
+`);
 ---
 
 <header class="navigation py-6 px-2 bg-slate-50">
@@ -8,8 +25,11 @@ import Logo from './Logo.astro';
     <div class="logo sm:tw-basis-1/3 font-bold p-1">
       <Logo />
     </div>
-    <div>
-      
-    </div>
+    <Navigation 
+      pages={navigationPages} 
+      currentPath={currentPath}
+      isPreview={isPreview}
+      client:load
+    />
   </div>
 </header>

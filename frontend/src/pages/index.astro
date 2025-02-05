@@ -21,12 +21,6 @@ const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
 ---
 
 <Layout title={pageTitle}>
-  {preview.isPreview && (
-    <div class="preview-banner">
-      Preview Mode - <a href="/">Exit Preview</a>
-    </div>
-  )}
-
   <main>
     {entry?.image?.[0] && (
       <figure>
@@ -49,24 +43,6 @@ const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
     )}
   </main>
 </Layout>
-
-<style>
-  .preview-banner {
-    background: #374151;
-    color: white;
-    padding: 0.5rem;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-  }
-  .preview-banner a {
-    color: #93c5fd;
-    text-decoration: underline;
-  }
-</style>
 
 {preview.isPreview && (
   <script>

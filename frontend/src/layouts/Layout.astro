@@ -1,24 +1,6 @@
 ---
-import { craftClient } from '../lib/craft';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import Navigation from '../components/Navigation.vue';
-
-// Pass the current path to the Navigation component
-const currentPath = Astro.url.pathname;
-const isPreview = import.meta.env.DEV || Astro.url.searchParams.has('preview');
-
-// Fetch pages for navigation
-const { entries: navigationPages } = await craftClient.query(`
-	query NavigationPages {
-		entries(section: "pages") {
-			id
-			uri
-			title
-			status
-		}
-	}
-`);
 
 const { title } = Astro.props;
 ---
@@ -34,19 +16,10 @@ const { title } = Astro.props;
 	</head>
 	<body>
 		<div class="flex min-h-screen flex-col">
-			<Header>
-				<Navigation 
-					pages={navigationPages} 
-					currentPath={currentPath}
-					isPreview={isPreview}
-					client:load
-				/>
-			</Header>
-
+			<Header />
 			<main class="grow">
 				<slot />
 			</main>
-
 			<Footer />
 		</div>
 	</body>

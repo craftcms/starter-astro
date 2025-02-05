@@ -3,39 +3,24 @@ import Layout from '../layouts/Layout.astro';
 import { craftClient } from '../lib/craft';
 import { getPreviewStatus } from '../lib/preview';
 import { PAGE_QUERY } from '../queries/pages';
-import { HOME_QUERY } from '../queries/home';
 
 const { slug } = Astro.params;
 const uri = Array.isArray(slug) ? slug.join('/') : slug;
 const preview = getPreviewStatus(Astro.url);
 
-// Choose query based on whether this is the homepage or not
-const isHome = !uri || uri === '';
-const query = isHome ? HOME_QUERY : PAGE_QUERY;
-const variables = isHome ? {} : { uri };
-
-console.log('Debug:', { isHome, uri, query: query.toString(), variables }); // Debug log
-
-const data = await craftClient.query(query, variables, {
+const data = await craftClient.query(PAGE_QUERY, { uri }, {
   preview: preview.isPreview,
   token: preview.token
 });
 
-const entry = isHome ? data?.entry : data?.entry;
+const entry = data?.entry;
 
 if (!entry) {
-  console.log('No entry found:', data); // Debug log
   return Astro.redirect('/404');
 }
 ---
 
 <Layout title={entry.title}>
-  {preview.isPreview && (
-    <div class="preview-banner">
-      Preview Mode - <a href={`/${uri || ''}`}>Exit Preview</a>
-    </div>
-  )}
-
   <main>
     {entry.image?.[0] && (
       <figure>
@@ -83,24 +68,6 @@ if (!entry) {
     )}
   </main>
 </Layout>
-
-<style>
-  .preview-banner {
-    background: #374151;
-    color: white;
-    padding: 0.5rem;
-    text-align: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-  }
-  .preview-banner a {
-    color: #93c5fd;
-    text-decoration: underline;
-  }
-</style>
 
 {preview.isPreview && (
   <script>
