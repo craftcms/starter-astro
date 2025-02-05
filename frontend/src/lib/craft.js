@@ -6,15 +6,9 @@ if (!gqlHost) {
   throw new Error('PUBLIC_GQL_HOST environment variable is not set');
 }
 
-// Read environment variables and ensure proper formatting
-const graphqlToken = import.meta.env.PUBLIC_GRAPHQL_TOKEN?.trim();
+// Ensure we have a valid URL
+const gqlUrl = new URL(gqlHost).toString();
+console.log('Initializing GraphQL client with:', { gqlUrl });
 
-if (!graphqlToken) {
-  console.warn('PUBLIC_GRAPHQL_TOKEN environment variable is not set');
-}
-
-// Create client instance
-export const craftClient = new GraphQLClient(
-  gqlHost,
-  import.meta.env.PUBLIC_GRAPHQL_TOKEN
-);
+// Create client instance - no need to pass token for public schema
+export const craftClient = new GraphQLClient(gqlUrl);

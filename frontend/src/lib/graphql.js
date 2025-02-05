@@ -1,75 +1,63 @@
 export class GraphQLClient {
-  constructor(craftUrl, token = null) {
+  constructor(craftUrl) {
+    // Store the original URL string without trying to parse it
     this.craftUrl = craftUrl;
-    this.token = token;
     
-    console.log('GraphQL Client initialized with:', {
-      url: this.craftUrl,
-      hasToken: !!this.token
-    });
+    if (!this.craftUrl) {
+      throw new Error('Invalid GraphQL URL');
+    }
+
+    console.log('GraphQL Client initialized with URL:', this.craftUrl);
   }
 
   async query(query, variables = {}, options = {}) {
     try {
-      if (!this.craftUrl) {
-        throw new Error('CRAFT_URL is not configured');
-      }
-
       const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       };
 
-      // Add auth header if private flag is true
-      if (options.private && this.token) {
-        headers['Authorization'] = `Bearer ${this.token}`;
+      // For Craft preview, we need to use the token as a query parameter
+      let url = this.craftUrl;
+      if (options.preview && options.token) {
+        // Append token to URL for preview requests
+        const previewUrl = new URL(this.craftUrl);
+        previewUrl.searchParams.set('token', options.token);
+        url = previewUrl.toString();
       }
 
-      if (options.previewToken) {
-        headers['X-Craft-Token'] = options.previewToken;
-        headers['X-Craft-Live-Preview'] = '1';
-      }
-
-      console.log('Full GraphQL Request:', {
-        url: this.craftUrl,
+      console.log('GraphQL Request:', {
+        url,
         headers,
         query,
-        variables
+        variables,
+        preview: options.preview,
+        hasToken: !!options.token
       });
 
-      const response = await fetch(this.craftUrl, {
+      const response = await fetch(url, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          query,
-          variables
-        }),
-        credentials: 'include'
+        body: JSON.stringify({ 
+          query: typeof query === 'string' ? query : query.toString(), 
+          variables 
+        })
       });
-
-      const responseText = await response.text();
-      console.log('Raw Response:', responseText);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
+        const text = await response.text();
+        console.error('GraphQL Response Error:', {
+          status: response.status,
+          text,
+          url
+        });
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error(`Failed to parse response: ${responseText}`);
-      }
-
-      // Debug response
-      console.log('GraphQL Response:', {
-        hasData: !!result.data,
-        hasErrors: !!result.errors,
-        data: result.data ? 'Present' : 'None'
-      });
+      const result = await response.json();
 
       if (result.errors) {
-        console.error('GraphQL Response Errors:', result.errors);
+        console.error('GraphQL Errors:', result.errors);
         throw new Error(result.errors[0]?.message || 'GraphQL error');
       }
 
@@ -78,8 +66,8 @@ export class GraphQLClient {
       console.error('GraphQL Error:', {
         message: err.message,
         craftUrl: this.craftUrl,
-        token: this.token ? '[REDACTED]' : 'none',
-        stack: err.stack
+        query,
+        variables
       });
       throw err;
     }

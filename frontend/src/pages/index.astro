@@ -1,65 +1,80 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PreviewWrapper from '../components/PreviewWrapper';
-import HomeContent from '../components/HomeContent';
 import { craftClient } from '../lib/craft';
-import { HOME_QUERY } from '../queries/home.mjs';
 import { getPreviewStatus } from '../lib/preview';
+import { HOME_QUERY } from '../queries/home.mjs';
 
-const { isPreview, previewToken } = getPreviewStatus(Astro.url);
+const preview = getPreviewStatus(Astro.url);
 
-let pageData = null;
-let error = null;
+console.log('Fetching home data...'); // Debug log
 
-try {
-  const response = await craftClient.query(HOME_QUERY);
-  pageData = response.entry;
-} catch (e) {
-  console.error('Error fetching data:', e);
-  error = e.message;
-}
+const data = await craftClient.query(HOME_QUERY, {}, {
+  preview: preview.isPreview,
+  token: preview.token
+});
+
+console.log('Home data:', data); // Debug log
+
+const entry = data?.entry;
+const siteName = import.meta.env.SITE_NAME || 'Site';
+const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
 ---
 
-<Layout title={pageData?.title || 'Home'}>
-  {error && (
-    <div class="error-message">
-      <p>Error loading page: {error}</p>
+<Layout title={pageTitle}>
+  {preview.isPreview && (
+    <div class="preview-banner">
+      Preview Mode - <a href="/">Exit Preview</a>
     </div>
   )}
 
-  {isPreview ? (
-    <PreviewWrapper 
-      client:only="react"
-      query={HOME_QUERY}
-    />
-  ) : (
-    <HomeContent client:load data={pageData} />
-  )}
+  <main>
+    {entry?.image?.[0] && (
+      <figure>
+        <img src={entry.image[0].url} alt={entry.image[0].alt} />
+      </figure>
+    )}
+
+    <div class="container mx-auto pt-12 pb-6 px-2">
+      <h1 class="font-bold text-4xl">{entry?.title}</h1>
+      {entry?.pageSubheading && (
+        <p class="mt-4">{entry.pageSubheading}</p>
+      )}
+    </div>
+
+    {entry?.pageContent && (
+      <div 
+        class="container mx-auto py-12 px-2 prose prose-slate lg:prose-xl"
+        set:html={entry.pageContent}
+      />
+    )}
+  </main>
 </Layout>
 
 <style>
-  .error-message {
-    color: red;
-    padding: 1rem;
-    margin: 1rem 0;
-    border: 1px solid red;
-    border-radius: 4px;
+  .preview-banner {
+    background: #374151;
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
   }
-
-  :global(.home-content) {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  :global(.hero-image) {
-    width: 100%;
-    height: auto;
-    margin: 2rem 0;
-  }
-
-  :global(.content) {
-    margin-top: 2rem;
+  .preview-banner a {
+    color: #93c5fd;
+    text-decoration: underline;
   }
 </style>
 
+{preview.isPreview && (
+  <script>
+    // Auto-refresh preview
+    window.addEventListener('message', (event) => {
+      if (event.data === 'preview:refresh') {
+        window.location.reload();
+      }
+    });
+  </script>
+)}
