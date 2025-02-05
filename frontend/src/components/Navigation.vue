@@ -8,12 +8,16 @@ defineProps({
   currentPath: {
     type: String,
     default: '/'
-  },
-  isPreview: {
-    type: Boolean,
-    default: false
   }
 })
+
+const renderPageLink = (page) => {
+  return {
+    href: `/${page.uri}`,
+    title: page.title,
+    isActive: currentPath === `/${page.uri}`
+  }
+}
 
 </script>
 
@@ -40,19 +44,31 @@ defineProps({
           Guestbook
         </a>
       </li>
-      <li v-for="page in pages" :key="page.uri">
-        <a 
-          :href="'/' + page.uri"
-          class="block p-2 hover:underline text-red-600 hover:text-red-600"
-          :class="{ 
-            'active': currentPath === '/' + page.uri,
-            'draft': page.draft && isPreview
-          }"
-          :aria-current="currentPath === '/' + page.uri ? 'page' : null"
-        >
-          {{ page.title }} {{ page.draft && isPreview ? '(Draft)' : '' }}
-        </a>
-      </li>
+      <template v-for="page in pages" :key="page.id">
+        <li>
+          <a 
+            :href="`/${page.uri}`"
+            class="block p-2 hover:underline text-red-600 hover:text-red-600"
+            :class="{ 'active': currentPath === `/${page.uri}` }"
+            :aria-current="currentPath === `/${page.uri}` ? 'page' : null"
+          >
+            {{ page.title }}
+          </a>
+          <!-- Render child pages if they exist -->
+          <ul v-if="page.children && page.children.length" class="pl-4">
+            <li v-for="child in page.children" :key="child.id">
+              <a 
+                :href="`/${child.uri}`"
+                class="block p-2 hover:underline text-red-600 hover:text-red-600"
+                :class="{ 'active': currentPath === `/${child.uri}` }"
+                :aria-current="currentPath === `/${child.uri}` ? 'page' : null"
+              >
+                {{ child.title }}
+              </a>
+            </li>
+          </ul>
+        </li>
+      </template>
     </ul>
   </nav>
 </template>
@@ -61,14 +77,5 @@ defineProps({
 .active {
   /* Add your active link styles */
   font-weight: bold;
-}
-
-.draft {
-  opacity: 0.7;
-}
-.draft::after {
-  content: ' (Draft)';
-  font-style: italic;
-  font-size: 0.9em;
 }
 </style>

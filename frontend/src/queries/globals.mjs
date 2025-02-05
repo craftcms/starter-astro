@@ -7,6 +7,8 @@ export const GLOBALS_QUERY = `
         logo {
           url
           alt
+          width
+          height
         }
         address {
           addressLine1
@@ -24,6 +26,20 @@ export const GLOBALS_QUERY = `
         id
         title
         uri
+        children {
+          ... on page_Entry {
+            id
+            title
+            uri
+            children {
+              ... on page_Entry {
+                id
+                title
+                uri
+              }
+            }
+          }
+        }
       }
     }
   }

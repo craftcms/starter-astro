@@ -1,3 +1,19 @@
-<footer>
-	<h2>Footer</h2>
+---
+const { address } = Astro.props;
+---
+
+<footer class="bg-slate-50 py-12 px-2">
+	<div class="container mx-auto">
+		{address && (
+			<address class="not-italic">
+				{address.title && <div class="font-bold">{address.title}</div>}
+				{address.addressLine1 && <div>{address.addressLine1}</div>}
+				{address.addressLine2 && <div>{address.addressLine2}</div>}
+				{address.addressLine3 && <div>{address.addressLine3}</div>}
+				{address.locality && <div>{address.locality}</div>}
+				{address.postalCode && <div>{address.postalCode}</div>}
+				{address.countryCode && <div>{address.countryCode}</div>}
+			</address>
+		)}
+	</div>
 </footer>
