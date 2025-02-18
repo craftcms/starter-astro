@@ -1,31 +1,80 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
+import { BLOG_QUERY } from '../../queries/blog.mjs';
 
-const query = `
-  query GetBlogPosts {
-    entries(section: "blog") {
-      id
-      title
-      uri
-      ... on blog_blog_Entry {
-        summary
-      }
-    }
-  }
-`;
+// Pagination parameters
+const limit = 4;
+const page = Number(Astro.url.searchParams.get('page')) || 1;
+const offset = (page - 1) * limit;
 
-const { entries } = await craftClient.query(query);
+// Fetch blog data
+const data = await craftClient.query(BLOG_QUERY, {
+  limit,
+  offset
+});
+
+// Extract data
+const blogPage = data?.blogEntries?.[0];
+const posts = data?.blogPostsEntries || [];
+const totalPosts = data?.entryCount || 0;
+const totalPages = Math.ceil(totalPosts / limit);
 ---
 
 <Layout title="Blog">
-  <div>
-    {entries.map((post) => (
-      <article>
-        <h2>{post.title}</h2>
-        <p>{post.summary}</p>
-        <a href={`/${post.uri}`}>Read more</a>
-      </article>
-    ))}
-  </div>
+  <main class="container mx-auto px-4 py-8">
+    {blogPage && (
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold mb-4">{blogPage.title}</h1>
+        {blogPage.pageSubheading && (
+          <p class="text-xl text-gray-600 mb-4">{blogPage.pageSubheading}</p>
+        )}
+        {blogPage.pageContent && (
+          <div class="prose max-w-none" set:html={blogPage.pageContent} />
+        )}
+      </div>
+    )}
+
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => (
+        <article class="flex flex-col">
+          {post.image?.[0] && (
+            <img 
+              src={post.image[0].url} 
+              alt={post.image[0].alt}
+              class="w-full h-48 object-cover mb-4"
+            />
+          )}
+          <h2 class="text-2xl font-bold mb-2">
+            <a href={`/blog/${post.slug}`} class="hover:text-red-600">
+              {post.title}
+            </a>
+          </h2>
+          <time class="text-gray-600 mb-2">{post.postDate}</time>
+          {post.pageSubheading && (
+            <p class="text-gray-700 mb-4">{post.pageSubheading}</p>
+          )}
+          <a href={`/blog/${post.slug}`} class="text-red-600 hover:underline mt-auto">
+            Read more
+          </a>
+        </article>
+      ))}
+    </div>
+
+    {totalPages > 1 && (
+      <div class="flex justify-center gap-2 mt-8">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+          <a
+            href={`/blog${pageNum === 1 ? '' : `?page=${pageNum}`}`}
+            class:list={[
+              'px-4 py-2 border rounded',
+              pageNum === page ? 'bg-red-600 text-white' : 'hover:bg-gray-100'
+            ]}
+          >
+            {pageNum}
+          </a>
+        ))}
+      </div>
+    )}
+  </main>
 </Layout>
