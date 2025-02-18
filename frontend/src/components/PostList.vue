@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { craftClient } from '../lib/craft';
-import { GUESTBOOK_POSTS_QUERY } from '../queries/guestbookPosts';
+import { GUESTBOOK_POSTS_QUERY } from '../queries/guestbookPosts.mjs';
 import Pagination from './Pagination.vue';
 
 const props = defineProps({

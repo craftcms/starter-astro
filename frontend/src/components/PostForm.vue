@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { craftClient } from '../lib/craft';
-import { CREATE_POST_MUTATION } from '../queries/post';
+import { CREATE_POST_MUTATION } from '../queries/guestbookPosts.mjs';
 
 const props = defineProps({
   authorId: {
