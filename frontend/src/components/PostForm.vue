@@ -1,7 +1,14 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { craftClient } from '../lib/craft';
-import { CREATE_POST_MUTATION } from '../queries/guestbookPosts.mjs';
+import { CREATE_POST_MUTATION } from '../queries/post.mjs';
+
+const message = ref('');
+const loading = ref(false);
+const error = ref('');
+const success = ref(false);
+
+const emit = defineEmits(['post-submitted']);
 
 const props = defineProps({
   authorId: {
@@ -9,11 +16,6 @@ const props = defineProps({
     required: true
   }
 });
-
-const message = ref('');
-const loading = ref(false);
-const error = ref('');
-const success = ref(false);
 
 const generateTitle = (text) => {
   const words = text.split(' ').slice(0, 3).join(' ').trim();
@@ -23,26 +25,39 @@ const generateTitle = (text) => {
 const title = computed(() => generateTitle(message.value));
 
 const submitPost = async () => {
-  if (!message.value.trim()) return;
+  if (!message.value.trim()) {
+    console.error('Message is required');
+    return;
+  }
   
   loading.value = true;
-  error.value = '';
-  success.value = false;
-  
   try {
+    console.log('Submitting with:', {
+      title: title.value,
+      message: message.value,
+      authorId: props.authorId
+    });
+
     const result = await craftClient.query(CREATE_POST_MUTATION, {
       title: title.value,
       message: message.value,
       authorId: props.authorId.toString()
+    }, {
+      private: true // This will add the Authorization header with the token
     });
 
-    if (result?.save_guestbookPosts_text_Entry) {
-      success.value = true;
-      message.value = '';
-      window.dispatchEvent(new CustomEvent('post-submitted'));
+    console.log('Mutation result:', result);
+
+    if (!result?.save_guestbookPosts_text_Entry) {
+      throw new Error('No data returned from the mutation');
     }
+
+    success.value = true;
+    message.value = '';
+    emit('post-submitted');
   } catch (err) {
-    error.value = err.message;
+    error.value = `Error posting message: ${err.message}`;
+    console.error('Error creating post:', err);
   } finally {
     loading.value = false;
   }

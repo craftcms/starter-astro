@@ -17,31 +17,28 @@ export class GraphQLClient {
         'Accept': 'application/json'
       };
 
-      // For Craft preview, we need to use the token as a query parameter
-      let url = this.craftUrl;
-      if (options.preview && options.token) {
-        // Append token to URL for preview requests
-        const previewUrl = new URL(this.craftUrl);
-        previewUrl.searchParams.set('token', options.token);
-        url = previewUrl.toString();
+      // Add auth header if private flag is true
+      if (options.private) {
+        const token = import.meta.env.PUBLIC_GRAPHQL_TOKEN;
+        if (!token) {
+          throw new Error('GRAPHQL_TOKEN is required for private mutations');
+        }
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
-      console.log('GraphQL Request:', {
-        url,
-        headers,
-        query,
-        variables,
-        preview: options.preview,
-        hasToken: !!options.token
-      });
+      // Add preview token if provided
+      if (options.previewToken) {
+        headers['X-Craft-Token'] = options.previewToken;
+      }
 
-      const response = await fetch(url, {
+      const response = await fetch(this.craftUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ 
           query: typeof query === 'string' ? query : query.toString(), 
           variables 
-        })
+        }),
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -49,19 +46,23 @@ export class GraphQLClient {
         console.error('GraphQL Response Error:', {
           status: response.status,
           text,
-          url
+          url: this.craftUrl
         });
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
       }
 
       const result = await response.json();
+
+      if (!result || typeof result !== 'object') {
+        throw new Error('Invalid response format');
+      }
 
       if (result.errors) {
         console.error('GraphQL Errors:', result.errors);
         throw new Error(result.errors[0]?.message || 'GraphQL error');
       }
 
-      return result.data;
+      return JSON.parse(JSON.stringify(result.data));
     } catch (err) {
       console.error('GraphQL Error:', {
         message: err.message,
