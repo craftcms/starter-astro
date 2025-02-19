@@ -3,12 +3,15 @@ import { craftClient } from '../lib/craft';
 import { GLOBALS_QUERY } from '../queries/globals';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import '../styles/tailwind.css';
 
 const { title } = Astro.props;
 const data = await craftClient.query(GLOBALS_QUERY);
 const globals = data?.globalEntries?.[0];
+const pages = data?.pagesEntries || [];
 const siteName = globals?.title || import.meta.env.SITE_NAME || 'Site';
 const pageTitle = title ? `${title} | ${siteName}` : siteName;
+const currentPath = Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
@@ -22,7 +25,7 @@ const pageTitle = title ? `${title} | ${siteName}` : siteName;
 	</head>
 	<body>
 		<div class="flex min-h-screen flex-col">
-			<Header />
+			<Header {currentPath} {pages} />
 			<main class="grow">
 				<slot />
 			</main>

@@ -1,0 +1,79 @@
+---
+interface Page {
+  id: string;
+  uri: string;
+  title: string;
+  children?: Page[];
+}
+
+const { currentPath, pages = [] } = Astro.props;
+
+const isActive = (uri: string) => currentPath === `/${uri}`;
+---
+
+<nav class="sm:basis-2/3 grow-1" aria-label="Primary">
+  <ul class="sm:flex">
+    <li>
+      <a 
+        href="/blog" 
+        class:list={[
+          "block p-2 hover:underline text-red-600 hover:text-red-600",
+          { active: isActive('blog') }
+        ]}
+        aria-current={isActive('blog') ? 'page' : null}
+      >
+        Blog
+      </a>
+    </li>
+    <li>
+      <a 
+        href="/guestbook" 
+        class:list={[
+          "block p-2 hover:underline text-red-600 hover:text-red-600",
+          { active: isActive('guestbook') }
+        ]}
+        aria-current={isActive('guestbook') ? 'page' : null}
+      >
+        Guestbook
+      </a>
+    </li>
+    {pages.map((page) => (
+      <li>
+        <a 
+          href={`/${page.uri}`}
+          class:list={[
+            "block p-2 hover:underline text-red-600 hover:text-red-600",
+            { active: isActive(page.uri) }
+          ]}
+          aria-current={isActive(page.uri) ? 'page' : null}
+        >
+          {page.title}
+        </a>
+        {page.children && page.children.length > 0 && (
+          <ul class="pl-4">
+            {page.children.map((child) => (
+              <li>
+                <a 
+                  href={`/${child.uri}`}
+                  class:list={[
+                    "block p-2 hover:underline text-red-600 hover:text-red-600",
+                    { active: isActive(child.uri) }
+                  ]}
+                  aria-current={isActive(child.uri) ? 'page' : null}
+                >
+                  {child.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .active {
+    font-weight: bold;
+  }
+</style> 
