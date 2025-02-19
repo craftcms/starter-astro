@@ -1,3 +1,18 @@
-<a href="/">
-	<img src="/logo.svg" alt="Craft CMS + Astro Starter" />
+---
+const { siteName, logo } = Astro.props;
+---
+
+<a href="/" class="text-red-600 block">
+	{logo?.length > 0 ? (
+		<>
+			<span class="sr-only">{siteName}</span>
+			<img 
+				src={logo[0].url} 
+				alt={logo[0].alt} 
+				class="w-10 h-10"
+			/>
+		</>
+	) : (
+		siteName
+	)}
 </a>
