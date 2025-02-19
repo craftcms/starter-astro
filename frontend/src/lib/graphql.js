@@ -1,6 +1,5 @@
 export class GraphQLClient {
   constructor(craftUrl) {
-    // Store the original URL string without trying to parse it
     this.craftUrl = craftUrl;
     
     if (!this.craftUrl) {
@@ -17,7 +16,6 @@ export class GraphQLClient {
         'Accept': 'application/json'
       };
 
-      // Add auth header if private flag is true
       if (options.private) {
         const token = import.meta.env.PUBLIC_GRAPHQL_TOKEN;
         if (!token) {
@@ -26,7 +24,6 @@ export class GraphQLClient {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Add preview token if provided
       if (options.previewToken) {
         headers['X-Craft-Token'] = options.previewToken;
       }
