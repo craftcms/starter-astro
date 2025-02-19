@@ -34,7 +34,7 @@ const currentPath = Astro.url.pathname;
 			<main class="grow">
 				<slot />
 			</main>
-			<Footer address={globals?.address} />
+			<Footer address={globals?.address[0]} />
 		</div>
 	</body>
 </html>
