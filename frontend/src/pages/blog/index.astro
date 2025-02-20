@@ -2,26 +2,32 @@
 import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
 import { BLOG_QUERY } from '../../queries/blog.mjs';
+import { getPaginationData } from '../../lib/pagination';
+import Pagination from '../../components/Pagination.astro';
 
-// Pagination parameters
-const limit = 4;
-const page = Number(Astro.url.searchParams.get('page')) || 1;
-const offset = (page - 1) * limit;
+// Get current page from URL
+const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
+const itemsPerPage = 4;
 
-// Fetch blog data
+// Fetch blog data with pagination
 const data = await craftClient.query(BLOG_QUERY, {
-  limit,
-  offset
+  limit: itemsPerPage,
+  offset: (currentPage - 1) * itemsPerPage
 });
 
 // Extract data
 const blogPage = data?.blogEntries?.[0];
 const posts = data?.blogPostsEntries || [];
 const totalPosts = data?.entryCount || 0;
-const totalPages = Math.ceil(totalPosts / limit);
+const { totalPages } = getPaginationData(currentPage, totalPosts, itemsPerPage);
+
+// Set page title with pagination info
+const pageTitle = totalPages > 1 
+  ? `${blogPage?.title || 'Blog'} - Page ${currentPage} of ${totalPages}`
+  : blogPage?.title || 'Blog';
 ---
 
-<Layout title="Blog">
+<Layout title={pageTitle}>
   <main class="container mx-auto px-4 py-8">
     {blogPage && (
       <div class="mb-12">
@@ -62,19 +68,10 @@ const totalPages = Math.ceil(totalPosts / limit);
     </div>
 
     {totalPages > 1 && (
-      <div class="flex justify-center gap-2 mt-8">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-          <a
-            href={`/blog${pageNum === 1 ? '' : `?page=${pageNum}`}`}
-            class:list={[
-              'px-4 py-2 border rounded',
-              pageNum === page ? 'bg-red-600 text-white' : 'hover:bg-gray-100'
-            ]}
-          >
-            {pageNum}
-          </a>
-        ))}
-      </div>
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
     )}
   </main>
 </Layout>

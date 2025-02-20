@@ -5,7 +5,7 @@ import { getPreviewStatus } from '../../lib/preview';
 import { GUESTBOOK_QUERY } from '../../queries/guestbook.mjs';
 import { GUESTBOOK_POSTS_QUERY } from '../../queries/guestbookPosts.mjs';
 import { getPaginationData } from '../../lib/pagination';
-import PostList from '../../components/PostList.vue';
+import Pagination from '../../components/Pagination.astro';
 import PostForm from '../../components/PostForm.vue';
 
 const preview = getPreviewStatus(Astro.url);
@@ -18,7 +18,7 @@ const data = await craftClient.query(GUESTBOOK_QUERY, {}, {
   token: preview.token
 });
 
-// Get initial posts for SSR
+// Get posts for server-side rendering
 const postsData = await craftClient.query(GUESTBOOK_POSTS_QUERY, {
   limit: itemsPerPage,
   offset: (currentPage - 1) * itemsPerPage
@@ -28,7 +28,7 @@ const postsData = await craftClient.query(GUESTBOOK_POSTS_QUERY, {
 });
 
 const content = data?.guestbookEntries?.[0];
-const initialPosts = postsData?.guestbookPostsEntries || [];
+const posts = postsData?.guestbookPostsEntries || [];
 const totalPosts = postsData?.entryCount || 0;
 
 // Get pagination data
@@ -60,13 +60,29 @@ const pageTitle = totalPages > 1
 
     <div class="container mx-auto px-2 sm:grid gap-6 grid-cols-2">
       <section class="mb-12">
-        <PostList 
-          client:load
-          previewToken={preview.token}
-          initialPosts={initialPosts}
-          initialTotalPosts={totalPosts}
-          initialCurrentPage={currentPage}
-        />
+        {posts.length > 0 ? (
+          <ol class="mb-2 divide-y divide-slate-300">
+            {posts.map((post) => (
+              <li>
+                <article class="text-xl py-6">
+                  <div set:html={post.textBlock} />
+                  <p class="text-sm mt-1">
+                    <time datetime={post.postDate}>{post.postDate}</time>
+                  </p>
+                </article>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="text-2xl">No entries yet. Create one using the form.</p>
+        )}
+
+        {totalPages > 1 && (
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+          />
+        )}
       </section>
 
       <section>
@@ -81,3 +97,10 @@ const pageTitle = totalPages > 1
     </div>
   </div>
 </Layout>
+
+<script>
+  // Refresh the page when a new post is submitted
+  document.addEventListener('post-submitted', () => {
+    window.location.href = '/guestbook?page=1';
+  });
+</script>

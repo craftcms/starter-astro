@@ -1,0 +1,54 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  isInteractive?: boolean;
+}
+
+const { currentPage, totalPages, isInteractive = false } = Astro.props;
+---
+
+<nav class="pt-6 text-sm" role="navigation" aria-label="Entry pagination">
+  <ul class="flex justify-between">
+    <li>
+      {currentPage !== 1 && (
+        isInteractive ? (
+          <button 
+            class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+            aria-label="Previous Page"
+          >
+            ← Previous page ({currentPage - 1} of {totalPages})
+          </button>
+        ) : (
+          <a 
+            href={`?page=${currentPage - 1}`}
+            class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+            aria-label="Previous Page"
+          >
+            ← Previous page ({currentPage - 1} of {totalPages})
+          </a>
+        )
+      )}
+    </li>
+    <li>
+      {currentPage !== totalPages && (
+        isInteractive ? (
+          <button 
+            class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+            aria-label="Next Page"
+          >
+            Next page ({currentPage + 1} of {totalPages}) →
+          </button>
+        ) : (
+          <a 
+            href={`?page=${currentPage + 1}`}
+            class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+            aria-label="Next Page"
+          >
+            Next page ({currentPage + 1} of {totalPages}) →
+          </a>
+        )
+      )}
+    </li>
+  </ul>
+</nav> 

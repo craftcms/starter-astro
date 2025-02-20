@@ -48,10 +48,9 @@ const submitPost = async () => {
     // Dispatch custom event
     window.dispatchEvent(new CustomEvent('post-submitted'));
     
-    // Update URL to page 1
-    const url = new URL(window.location);
-    url.searchParams.set('page', '1');
-    window.history.pushState({}, '', url);
+    // Navigate to first page with a full page load
+    window.location.replace('/guestbook?page=1');
+    
   } catch (err) {
     error.value = `Error posting message: ${err.message}`;
     console.error('Error creating post:', err);
