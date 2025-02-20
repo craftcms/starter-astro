@@ -8,8 +8,6 @@ const loading = ref(false);
 const error = ref('');
 const success = ref(false);
 
-const emit = defineEmits(['post-submitted']);
-
 const props = defineProps({
   authorId: {
     type: Number,
@@ -32,21 +30,13 @@ const submitPost = async () => {
   
   loading.value = true;
   try {
-    console.log('Submitting with:', {
-      title: title.value,
-      message: message.value,
-      authorId: props.authorId
-    });
-
     const result = await craftClient.query(CREATE_POST_MUTATION, {
       title: title.value,
       message: message.value,
       authorId: props.authorId.toString()
     }, {
-      private: true // This will add the Authorization header with the token
+      private: true
     });
-
-    console.log('Mutation result:', result);
 
     if (!result?.save_guestbookPosts_text_Entry) {
       throw new Error('No data returned from the mutation');
@@ -54,7 +44,14 @@ const submitPost = async () => {
 
     success.value = true;
     message.value = '';
-    emit('post-submitted');
+    
+    // Dispatch custom event
+    window.dispatchEvent(new CustomEvent('post-submitted'));
+    
+    // Update URL to page 1
+    const url = new URL(window.location);
+    url.searchParams.set('page', '1');
+    window.history.pushState({}, '', url);
   } catch (err) {
     error.value = `Error posting message: ${err.message}`;
     console.error('Error creating post:', err);

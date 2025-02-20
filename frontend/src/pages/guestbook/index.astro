@@ -3,20 +3,42 @@ import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
 import { getPreviewStatus } from '../../lib/preview';
 import { GUESTBOOK_QUERY } from '../../queries/guestbook.mjs';
+import { GUESTBOOK_POSTS_QUERY } from '../../queries/guestbookPosts.mjs';
+import { getPaginationData } from '../../lib/pagination';
 import PostList from '../../components/PostList.vue';
 import PostForm from '../../components/PostForm.vue';
 
 const preview = getPreviewStatus(Astro.url);
+const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
+const itemsPerPage = 4;
 
+// Get page content
 const data = await craftClient.query(GUESTBOOK_QUERY, {}, {
   preview: preview.isPreview,
   token: preview.token
 });
 
+// Get initial posts for SSR
+const postsData = await craftClient.query(GUESTBOOK_POSTS_QUERY, {
+  limit: itemsPerPage,
+  offset: (currentPage - 1) * itemsPerPage
+}, {
+  preview: preview.isPreview,
+  token: preview.token
+});
+
 const content = data?.guestbookEntries?.[0];
+const initialPosts = postsData?.guestbookPostsEntries || [];
+const totalPosts = postsData?.entryCount || 0;
+
+// Get pagination data
+const { totalPages } = getPaginationData(currentPage, totalPosts, itemsPerPage);
+const pageTitle = totalPages > 1 
+  ? `${content?.title || 'Guestbook'} - Page ${currentPage} of ${totalPages}`
+  : content?.title || 'Guestbook';
 ---
 
-<Layout title={content?.title || 'Guestbook'}>
+<Layout title={pageTitle}>
   <div>
     <header class="container mx-auto pt-12 pb-6 px-2">
       <h1 class="font-bold text-4xl sm:text-6xl lg:text-9xl">
@@ -41,6 +63,9 @@ const content = data?.guestbookEntries?.[0];
         <PostList 
           client:load
           previewToken={preview.token}
+          initialPosts={initialPosts}
+          initialTotalPosts={totalPosts}
+          initialCurrentPage={currentPage}
         />
       </section>
 

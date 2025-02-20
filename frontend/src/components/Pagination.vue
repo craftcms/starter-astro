@@ -1,4 +1,6 @@
 <script setup>
+import { getPaginationData } from '../lib/pagination';
+
 const props = defineProps({
   currentPage: {
     type: Number,
@@ -30,22 +32,24 @@ const prevPage = () => {
     <ul class="flex justify-between">
       <li>
         <button 
-          @click="prevPage" 
-          v-if="currentPage !== 1" 
+          v-if="currentPage !== 1"
+          @click="prevPage"
           class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+          aria-label="Previous Page"
         >
           ← Previous page ({{ currentPage - 1 }} of {{ totalPages }})
         </button>
       </li>
       <li>
         <button 
-          @click="nextPage" 
-          v-if="currentPage !== totalPages" 
+          v-if="currentPage !== totalPages"
+          @click="nextPage"
           class="text-red-600 cursor-pointer font-bold hover:underline focus:underline"
+          aria-label="Next Page"
         >
           Next page ({{ currentPage }} of {{ totalPages }}) →
         </button>
       </li>
     </ul>
   </nav>
-</template>
+</template> 

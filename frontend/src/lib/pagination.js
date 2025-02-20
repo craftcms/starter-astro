@@ -1,12 +1,13 @@
-export function getPaginationData(url, itemsPerPage = 4) {
-  const searchParams = new URL(url).searchParams;
-  const currentPage = parseInt(searchParams.get('page')) || 1;
-  
+export function getPaginationData(page, totalItems, itemsPerPage = 4) {
+  const currentPage = parseInt(page) || 1;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const offset = (currentPage - 1) * itemsPerPage;
+
   return {
     currentPage,
-    itemsPerPage,
-    offset: (currentPage - 1) * itemsPerPage,
-    limit: itemsPerPage
+    totalPages,
+    offset,
+    itemsPerPage
   };
 }
 

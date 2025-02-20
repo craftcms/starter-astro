@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { craftClient } from '../lib/craft';
 import { GUESTBOOK_POSTS_QUERY } from '../queries/guestbookPosts.mjs';
 import Pagination from './Pagination.vue';
@@ -8,28 +8,46 @@ const props = defineProps({
   previewToken: {
     type: String,
     default: null
+  },
+  initialPosts: {
+    type: Array,
+    default: () => []
+  },
+  initialTotalPosts: {
+    type: Number,
+    default: 0
+  },
+  initialCurrentPage: {
+    type: Number,
+    default: 1
   }
 });
 
-const posts = ref([]);
-const loading = ref(true);
+const posts = ref(props.initialPosts);
+const loading = ref(false);
 const error = ref(null);
-const currentPage = ref(1);
-const totalPosts = ref(0);
+const currentPage = ref(props.initialCurrentPage);
+const totalPosts = ref(props.initialTotalPosts);
 const itemsPerPage = 4;
 
-const fetchPosts = async () => {
+const fetchPosts = async (page = currentPage.value) => {
   loading.value = true;
   try {
     const result = await craftClient.query(GUESTBOOK_POSTS_QUERY, {
       limit: itemsPerPage,
-      offset: (currentPage.value - 1) * itemsPerPage
+      offset: (page - 1) * itemsPerPage
     }, {
       previewToken: props.previewToken
     });
     
     posts.value = result?.guestbookPostsEntries || [];
     totalPosts.value = result?.entryCount || 0;
+    currentPage.value = page;
+
+    // Update URL without page reload
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.history.pushState({}, '', url);
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -37,31 +55,23 @@ const fetchPosts = async () => {
   }
 };
 
-const totalPages = computed(() => 
-  Math.ceil(totalPosts.value / itemsPerPage)
-);
+const handlePageChange = (newPage) => {
+  fetchPosts(newPage);
+};
 
-const updatePage = (newPage) => {
-  currentPage.value = newPage;
-  fetchPosts();
-  
-  // Update URL
-  const url = new URL(window.location);
-  url.searchParams.set('page', newPage);
-  window.history.pushState({}, '', url);
+const resetToFirstPage = () => {
+  fetchPosts(1);
 };
 
 onMounted(() => {
   // Listen for new posts
-  window.addEventListener('post-submitted', fetchPosts);
+  window.addEventListener('post-submitted', resetToFirstPage);
   
-  // Get initial page from URL
-  const urlPage = new URLSearchParams(window.location.search).get('page');
-  if (urlPage) {
-    currentPage.value = parseInt(urlPage);
-  }
-  
-  fetchPosts();
+  // Handle browser navigation
+  window.addEventListener('popstate', () => {
+    const urlPage = new URLSearchParams(window.location.search).get('page');
+    fetchPosts(parseInt(urlPage) || 1);
+  });
 });
 </script>
 
@@ -87,10 +97,10 @@ onMounted(() => {
         </li>
       </ol>
       <Pagination
-        v-if="totalPages > 1"
+        v-if="Math.ceil(totalPosts / itemsPerPage) > 1"
         :currentPage="currentPage"
-        :totalPages="totalPages"
-        @update:currentPage="updatePage"
+        :totalPages="Math.ceil(totalPosts / itemsPerPage)"
+        @update:currentPage="handlePageChange"
       />
     </div>
     <p v-else class="text-2xl">No entries yet. Create one using the form.</p>
