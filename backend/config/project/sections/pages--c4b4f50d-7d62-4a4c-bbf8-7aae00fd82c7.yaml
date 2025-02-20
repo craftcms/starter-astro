@@ -1,7 +1,8 @@
 defaultPlacement: end
 enableVersioning: true
 entryTypes:
-  - 697da4c2-e02f-4f49-9d76-e22609ceda25 # Page
+  -
+    uid: 697da4c2-e02f-4f49-9d76-e22609ceda25 # Page
 handle: pages
 maxAuthors: 1
 name: Pages
@@ -23,7 +24,7 @@ siteSettings:
     enabledByDefault: true
     hasUrls: true
     template: null
-    uriFormat: '{slug}'
+    uriFormat: '{parent.uri}/{slug}'
 structure:
   maxLevels: null
   uid: 97fc32ea-6e86-45dd-b3dd-97cdc4360518
