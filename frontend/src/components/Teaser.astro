@@ -1,0 +1,37 @@
+---
+const { entry, featured } = Astro.props;
+---
+
+<article class="py-6 mb-12">
+  {featured && (
+    <figure>
+      <a 
+        href={`/${entry.uri}`} 
+        class="text-red-600 hover:underline focus:underline cursor-pointer block mb-4"
+      >
+        {entry.image && entry.image.length > 0 ? (
+          <img 
+            src={entry.image[0].url} 
+            alt={entry.image[0].alt} 
+          />
+        ) : (
+          <div class="bg-slate-200 aspect-video hover:bg-slate-300"></div>
+        )}
+      </a>
+    </figure>
+  )}
+  <div class="mb-4">
+    <h2 class="font-bold mb-2 text-4xl">
+      <a 
+        href={`/${entry.uri}`} 
+        class="text-red-600 hover:underline focus:underline cursor-pointer"
+      >
+        {entry.title}
+      </a>
+    </h2>
+    {entry.pageSubheading && <p>{entry.pageSubheading}</p>}
+    <p>
+      <time class="text-sm" datetime={entry.postDate}>{entry.postDate}</time>
+    </p>
+  </div>
+</article>
