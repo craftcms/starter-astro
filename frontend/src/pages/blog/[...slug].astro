@@ -28,7 +28,7 @@ const hasNextPrev = post.next || post.prev;
   <article>
     <header class="container mx-auto pt-12 pb-6 px-2 text-2xl relative">
       {hasHero && 
-        <figure class="absolute top-0 left-0 w-full h-full aspect-video">
+        <figure class="">
           <img src={post.image[0].url} alt={post.image[0].alt} />
         </figure>
       }
