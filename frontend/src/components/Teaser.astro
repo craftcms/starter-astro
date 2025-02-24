@@ -1,25 +1,24 @@
 ---
-const { entry, featured } = Astro.props;
+const { entry } = Astro.props;
 ---
 
 <article class="py-6 mb-12">
-  {featured && (
-    <figure>
-      <a 
-        href={`/${entry.uri}`} 
-        class="text-red-600 hover:underline focus:underline cursor-pointer block mb-4"
-      >
-        {entry.image && entry.image.length > 0 ? (
-          <img 
-            src={entry.image[0].url} 
-            alt={entry.image[0].alt} 
-          />
-        ) : (
-          <div class="bg-slate-200 aspect-video hover:bg-slate-300"></div>
-        )}
-      </a>
-    </figure>
-  )}
+  <figure>
+    <a 
+      href={`/${entry.uri}`} 
+      class="text-red-600 hover:underline focus:underline cursor-pointer block mb-4"
+    >
+      {entry.image && entry.image.length > 0 ? (
+        <img 
+          src={entry.image[0].url} 
+          alt={entry.image[0].alt} 
+          class="aspect-video object-cover"
+        />
+      ) : (
+        <div class="bg-slate-200 aspect-video hover:bg-slate-300"></div>
+      )}
+    </a>
+  </figure>
   <div class="mb-4">
     <h2 class="font-bold mb-2 text-4xl">
       <a 

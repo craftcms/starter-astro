@@ -6,23 +6,19 @@ import { getPaginationData } from '../../lib/pagination';
 import Pagination from '../../components/Pagination.astro';
 import Teaser from '../../components/Teaser.astro';
 
-// Get current page from URL
 const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
 const itemsPerPage = 4;
 
-// Fetch blog data with pagination
 const data = await craftClient.query(BLOG_QUERY, {
   limit: itemsPerPage,
   offset: (currentPage - 1) * itemsPerPage
 });
 
-// Extract data
 const blogPage = data?.blogEntries?.[0];
 const posts = data?.blogPostsEntries || [];
 const totalPosts = data?.entryCount || 0;
 const { totalPages } = getPaginationData(currentPage, totalPosts, itemsPerPage);
 
-// Set page title with pagination info
 const pageTitle = totalPages > 1 
   ? `${blogPage?.title || 'Blog'} - Page ${currentPage} of ${totalPages}`
   : blogPage?.title || 'Blog';
