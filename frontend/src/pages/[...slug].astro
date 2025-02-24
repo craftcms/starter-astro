@@ -28,7 +28,7 @@ if (!entry) {
       </figure>
     )}
 
-    <div class="container mx-auto pt-12 pb-6 px-2">
+    <div class="container mx-auto pt-12 pb-6 px-2 text-2xl">
       {entry.ancestors?.length > 0 && (
         <ul class="mb-2 text-base text-slate-500">
           {entry.ancestors.map((ancestor) => (
@@ -39,7 +39,7 @@ if (!entry) {
         </ul>
       )}
 
-      <h1 class="font-bold text-4xl">{entry.title}</h1>
+      <h1 class="font-bold text-4xl sm:text-6xl lg:text-9xl">{entry.title}</h1>
       {entry.pageSubheading && (
         <p class="mt-4">{entry.pageSubheading}</p>
       )}

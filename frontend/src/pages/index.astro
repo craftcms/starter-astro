@@ -28,8 +28,8 @@ const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
       </figure>
     )}
 
-    <div class="container mx-auto pt-12 pb-6 px-2">
-      <h1 class="font-bold text-4xl">{entry?.title}</h1>
+    <div class="container mx-auto pt-12 pb-6 px-2 text-2xl">
+      <h1 class="font-bold text-4xl sm:text-6xl lg:text-9xl">{entry?.title}</h1>
       {entry?.pageSubheading && (
         <p class="mt-4">{entry.pageSubheading}</p>
       )}
