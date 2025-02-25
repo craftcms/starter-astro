@@ -9,8 +9,7 @@ const uri = Array.isArray(slug) ? slug.join('/') : slug;
 const preview = getPreviewStatus(Astro.url);
 
 const data = await craftClient.query(PAGE_QUERY, { uri }, {
-  preview: preview.isPreview,
-  token: preview.token
+  previewToken: preview.token
 });
 
 const entry = data?.entry;
@@ -69,13 +68,12 @@ if (!entry) {
   </main>
 </Layout>
 
-{preview.isPreview && (
+{preview.isPreview && 
   <script>
-    // Auto-refresh preview
     window.addEventListener('message', (event) => {
       if (event.data === 'preview:refresh') {
         window.location.reload();
       }
     });
   </script>
-)} 
+} 

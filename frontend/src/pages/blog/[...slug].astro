@@ -11,8 +11,7 @@ const preview = getPreviewStatus(Astro.url);
 const data = await craftClient.query(BLOG_POSTS_QUERY, { 
   slug: Array.isArray(slug) ? slug[0] : slug 
 }, {
-  preview: preview.isPreview,
-  token: preview.token
+  previewToken: preview.token
 });
 
 const post = data?.blogPostsEntries?.[0];

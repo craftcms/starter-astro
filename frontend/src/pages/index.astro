@@ -9,8 +9,7 @@ const preview = getPreviewStatus(Astro.url);
 console.log('Fetching home data...'); // Debug log
 
 const data = await craftClient.query(HOME_QUERY, {}, {
-  preview: preview.isPreview,
-  token: preview.token
+  previewToken: preview.token
 });
 
 console.log('Home data:', data); // Debug log
@@ -46,7 +45,6 @@ const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
 
 {preview.isPreview && (
   <script>
-    // Auto-refresh preview
     window.addEventListener('message', (event) => {
       if (event.data === 'preview:refresh') {
         window.location.reload();

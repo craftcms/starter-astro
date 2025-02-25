@@ -1,17 +1,21 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
+import { getPreviewStatus } from '../../lib/preview';
 import { BLOG_QUERY } from '../../queries/blog.mjs';
 import { getPaginationData } from '../../lib/pagination';
 import Pagination from '../../components/Pagination.astro';
 import Teaser from '../../components/Teaser.astro';
 
+const preview = getPreviewStatus(Astro.url);
 const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
 const itemsPerPage = 4;
 
 const data = await craftClient.query(BLOG_QUERY, {
   limit: itemsPerPage,
   offset: (currentPage - 1) * itemsPerPage
+}, {
+  previewToken: preview.token
 });
 
 const blogPage = data?.blogEntries?.[0];
@@ -63,3 +67,13 @@ const pageTitle = totalPages > 1
     </section>
   </main>
 </Layout>
+
+{preview.isPreview && 
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.data === 'preview:refresh') {
+        window.location.reload();
+      }
+    });
+  </script>
+}

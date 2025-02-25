@@ -12,26 +12,21 @@ const preview = getPreviewStatus(Astro.url);
 const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
 const itemsPerPage = 4;
 
-// Get page content
 const data = await craftClient.query(GUESTBOOK_QUERY, {}, {
-  preview: preview.isPreview,
-  token: preview.token
+  previewToken: preview.token
 });
 
-// Get posts for server-side rendering
 const postsData = await craftClient.query(GUESTBOOK_POSTS_QUERY, {
   limit: itemsPerPage,
   offset: (currentPage - 1) * itemsPerPage
 }, {
-  preview: preview.isPreview,
-  token: preview.token
+  previewToken: preview.token
 });
 
 const content = data?.guestbookEntries?.[0];
 const posts = postsData?.guestbookPostsEntries || [];
 const totalPosts = postsData?.entryCount || 0;
 
-// Get pagination data
 const { totalPages } = getPaginationData(currentPage, totalPosts, itemsPerPage);
 const pageTitle = totalPages > 1 
   ? `${content?.title || 'Guestbook'} - Page ${currentPage} of ${totalPages}`
@@ -98,9 +93,17 @@ const pageTitle = totalPages > 1
   </div>
 </Layout>
 
-<script>
-  // Refresh the page when a new post is submitted
-  document.addEventListener('post-submitted', () => {
-    window.location.href = '/guestbook?page=1';
-  });
-</script>
+{preview.isPreview && 
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.data === 'preview:refresh') {
+        window.location.reload();
+      }
+    });
+
+    // Keep the existing post submission handler
+    document.addEventListener('post-submitted', () => {
+      window.location.href = '/guestbook?page=1';
+    });
+  </script>
+}
