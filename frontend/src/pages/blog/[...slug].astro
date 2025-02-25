@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
-import { getPreviewStatus } from '../../lib/preview';
+import { getPreviewStatus, PreviewScript } from '../../lib/preview';
 import { BLOG_POSTS_QUERY } from '../../queries/blogPosts';
 import Teaser from '../../components/Teaser.astro';
 
@@ -76,12 +76,4 @@ const hasNextPrev = post.next || post.prev;
   </article>
 </Layout>
 
-{preview.isPreview && 
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.data === 'preview:refresh') {
-        window.location.reload();
-      }
-    });
-  </script>
-}
+<Fragment set:html={PreviewScript({ isPreview: preview.isPreview })} />

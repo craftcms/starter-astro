@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { craftClient } from '../lib/craft';
-import { getPreviewStatus } from '../lib/preview';
+import { getPreviewStatus, PreviewScript } from '../lib/preview';
 import { PAGE_QUERY } from '../queries/pages';
 
 const { slug } = Astro.params;
@@ -68,12 +68,4 @@ if (!entry) {
   </main>
 </Layout>
 
-{preview.isPreview && 
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.data === 'preview:refresh') {
-        window.location.reload();
-      }
-    });
-  </script>
-} 
+<Fragment set:html={PreviewScript({ isPreview: preview.isPreview })} /> 

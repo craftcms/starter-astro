@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { craftClient } from '../../lib/craft';
-import { getPreviewStatus } from '../../lib/preview';
+import { getPreviewStatus, PreviewScript } from '../../lib/preview';
 import { GUESTBOOK_QUERY } from '../../queries/guestbook.mjs';
 import { GUESTBOOK_POSTS_QUERY } from '../../queries/guestbookPosts.mjs';
 import { getPaginationData } from '../../lib/pagination';
@@ -93,17 +93,10 @@ const pageTitle = totalPages > 1
   </div>
 </Layout>
 
-{preview.isPreview && 
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.data === 'preview:refresh') {
-        window.location.reload();
-      }
-    });
+<Fragment set:html={PreviewScript({ isPreview: preview.isPreview })} />
 
-    // Keep the existing post submission handler
-    document.addEventListener('post-submitted', () => {
-      window.location.href = '/guestbook?page=1';
-    });
-  </script>
-}
+<script>
+  document.addEventListener('post-submitted', () => {
+    window.location.href = '/guestbook?page=1';
+  });
+</script>

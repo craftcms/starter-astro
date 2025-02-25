@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { craftClient } from '../lib/craft';
-import { getPreviewStatus } from '../lib/preview';
+import { getPreviewStatus, PreviewScript } from '../lib/preview';
 import { HOME_QUERY } from '../queries/home.mjs';
 
 const preview = getPreviewStatus(Astro.url);
@@ -43,12 +43,4 @@ const pageTitle = entry?.title ? `${entry.title} | ${siteName}` : siteName;
   </main>
 </Layout>
 
-{preview.isPreview && (
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.data === 'preview:refresh') {
-        window.location.reload();
-      }
-    });
-  </script>
-)}
+<Fragment set:html={PreviewScript({ isPreview: preview.isPreview })} />
