@@ -6,13 +6,9 @@ import { HOME_QUERY } from '../queries/home.mjs';
 
 const preview = getPreviewStatus(Astro.url);
 
-console.log('Fetching home data...'); // Debug log
-
 const data = await craftClient.query(HOME_QUERY, {}, {
   previewToken: preview.token
 });
-
-console.log('Home data:', data); // Debug log
 
 const entry = data?.entry;
 const siteName = import.meta.env.SITE_NAME || 'Site';
