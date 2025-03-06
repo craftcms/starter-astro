@@ -8,6 +8,12 @@ interface Page {
 
 const { currentPath, pages = [] } = Astro.props;
 
+const isActiveOrChild = (pageUri: string) => {
+  const cleanCurrentPath = currentPath.replace(/\/$/, '');
+  const cleanPageUri = `/${pageUri}`.replace(/\/$/, '');
+  return cleanCurrentPath === cleanPageUri || cleanCurrentPath.startsWith(cleanPageUri + '/');
+};
+
 const isActive = (uri: string) => currentPath === `/${uri}`;
 ---
 
@@ -37,7 +43,7 @@ const isActive = (uri: string) => currentPath === `/${uri}`;
         Guestbook
       </a>
     </li>
-    {pages.map((page) => (
+    {pages.map((page: Page) => (
       <li>
         <a 
           href={`/${page.uri}`}
@@ -49,9 +55,9 @@ const isActive = (uri: string) => currentPath === `/${uri}`;
         >
           {page.title}
         </a>
-        {page.children && page.children.length > 0 && (
+        {page.children && page.children.length > 0 && isActiveOrChild(page.uri) && (
           <ul class="pl-4">
-            {page.children.map((child) => (
+            {page.children.map((child: Page) => (
               <li>
                 <a 
                   href={`/${child.uri}`}
