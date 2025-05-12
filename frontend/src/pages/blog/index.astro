@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { craftClient } from '../../lib/craft';
+import { craftClient } from '../../lib/graphql';
 import { getPreviewStatus, PreviewScript } from '../../lib/preview';
 import { BLOG_QUERY } from '../../queries/blog.mjs';
 import { getPaginationData } from '../../lib/pagination';
@@ -8,7 +8,7 @@ import Pagination from '../../components/Pagination.astro';
 import Teaser from '../../components/Teaser.astro';
 
 const preview = getPreviewStatus(Astro.url);
-const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
+const currentPage = parseInt(Astro.url.searchParams.get('page') || '') || 1;
 const itemsPerPage = 4;
 
 const data = await craftClient.query(BLOG_QUERY, {
@@ -46,7 +46,7 @@ const pageTitle = totalPages > 1
     <section class="container mx-auto mb-6 px-2 divide-y divide-slate-300">
       {posts.length > 0 ? (
         <div class="sm:grid sm:grid-cols-2 sm:gap-6">
-          {posts.map((post, index) => (
+          {posts.map((post: any, index: any) => (
             <Teaser 
               entry={post}
               featured={index === 0 && currentPage === 1}

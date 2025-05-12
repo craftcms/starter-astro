@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { craftClient } from '../../lib/craft';
+import { craftClient } from '../../lib/graphql';
 import { getPreviewStatus, PreviewScript } from '../../lib/preview';
 import { GUESTBOOK_QUERY } from '../../queries/guestbook.mjs';
 import { GUESTBOOK_POSTS_QUERY } from '../../queries/guestbookPosts.mjs';
@@ -9,7 +9,7 @@ import Pagination from '../../components/Pagination.astro';
 import PostForm from '../../components/PostForm.vue';
 
 const preview = getPreviewStatus(Astro.url);
-const currentPage = parseInt(Astro.url.searchParams.get('page')) || 1;
+const currentPage = parseInt(Astro.url.searchParams.get('page') || '') || 1;
 const itemsPerPage = 4;
 
 const data = await craftClient.query(GUESTBOOK_QUERY, {}, {
@@ -57,7 +57,7 @@ const pageTitle = totalPages > 1
       <section class="mb-12">
         {posts.length > 0 ? (
           <ol class="mb-2 divide-y divide-slate-300">
-            {posts.map((post) => (
+            {posts.map((post: any) => (
               <li>
                 <article class="text-xl py-6">
                   <div set:html={post.textBlock} />

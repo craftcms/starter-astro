@@ -1,8 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { craftClient } from '../../lib/craft';
+import { craftClient } from '../../lib/graphql';
 import { getPreviewStatus, PreviewScript } from '../../lib/preview';
-import { BLOG_POSTS_QUERY } from '../../queries/blogPosts';
+import { BLOG_POSTS_QUERY } from '../../queries/blogPosts.mjs';
 import Teaser from '../../components/Teaser.astro';
 
 const { slug } = Astro.params;

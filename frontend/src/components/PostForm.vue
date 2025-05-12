@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { craftClient } from '../lib/craft';
+import { craftClient } from '../lib/graphql';
 import { CREATE_POST_MUTATION } from '../queries/post.mjs';
 
 const message = ref('');
