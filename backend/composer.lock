@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "04f477df6c0f4ba97e97a6d2fbe69adc",
+    "content-hash": "04949697099af2df18111ceea5c2a29e",
     "packages": [
         {
             "name": "99designs/http-signatures",
@@ -7272,16 +7272,16 @@
         },
         {
             "name": "yiisoft/yii2-redis",
-            "version": "2.0.19",
+            "version": "2.0.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-redis.git",
-                "reference": "81a4a562873bca9f383d5b95db57d161d5828e24"
+                "reference": "d5b89cb4977b73bc813d3b85a1017337ac64267c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-redis/zipball/81a4a562873bca9f383d5b95db57d161d5828e24",
-                "reference": "81a4a562873bca9f383d5b95db57d161d5828e24",
+                "url": "https://api.github.com/repos/yiisoft/yii2-redis/zipball/d5b89cb4977b73bc813d3b85a1017337ac64267c",
+                "reference": "d5b89cb4977b73bc813d3b85a1017337ac64267c",
                 "shasum": ""
             },
             "require": {
@@ -7342,7 +7342,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-02-13T21:03:06+00:00"
+            "time": "2025-06-05T04:02:45+00:00"
         },
         {
             "name": "yiisoft/yii2-symfonymailer",
@@ -7821,5 +7821,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
