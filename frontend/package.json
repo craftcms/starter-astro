@@ -2,6 +2,9 @@
   "name": "frontend",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -9,15 +12,20 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.2.0",
-    "@astrojs/vue": "^5.0.10",
-    "@tailwindcss/vite": "^4.1.4",
-    "astro": "^5.7.0",
-    "tailwindcss": "^4.1.4",
-    "vue": "^3.5.13"
+    "@astrojs/node": "^11.1.11",
+    "@astrojs/vue": "^7.1.2",
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.8",
+    "tailwindcss": "^4.3.5",
+    "vue": "^3.5.45"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16"
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.20"
+  },
+  "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^6.1.6"
+    }
   }
 }
