@@ -1,6 +1,9 @@
-# Craft CMS + Astro Starter
+# Craft CMS + Astro Starter (Craft 6)
 
-A minimal, production-ready starter for [Astro 5](https://astro.build) and [Craft CMS](https://craftcms.com/) projects. Check out the [features](#key-features), or [dive right in](#quick-start)!
+> [!WARNING]
+> This branch targets Craft 6, which is in beta. For production sites, use the Craft 5 version on the `5.x` branch.
+
+A minimal, production-ready starter for [Astro 7](https://astro.build) and [Craft CMS](https://craftcms.com/) projects. Check out the [features](#key-features), or [dive right in](#quick-start)!
 
 > [!TIP]
 > Curious about Craft, but want to try it with a different framework? We have [other starter projects](https://craftcms.com/starters), too!
@@ -11,7 +14,7 @@ This project assumes you have our recommended development environment  [DDEV](ht
 
 1. Clone this repository, and move into the new directory:
     ```bash
-    git clone https://github.com/craftcms/starter-astro.git
+    git clone --branch 6.x https://github.com/craftcms/starter-astro.git
     # ...
     cd starter-astro
     ```
@@ -22,19 +25,20 @@ This project assumes you have our recommended development environment  [DDEV](ht
 
     ```bash
     ddev composer install
-    ddev craft install
+    ddev artisan key:generate
+    ddev artisan craft:install
     ```
 
     Write down the username and password you choose, during installation. You'll need it to [log in to the control panel](#control-panel).
 
-1. Generate a token for the _Posts_ GraphQL Schema:
+1. Generate a token for the _Guestbook_ GraphQL schema:
 
     ```bash
     # Display a list of schemas and UUIDs:
-    ddev craft graphql/list-schemas
+    ddev artisan craft:graphql:list-schemas
 
     # Use the "Guestbook" schema ID to generate a token:
-    ddev craft graphql/create-token c7d2eb61-cdde-4a76-88a9-eb30ddcf155b
+    ddev artisan craft:graphql:create-token c7d2eb61-cdde-4a76-88a9-eb30ddcf155b --name=Astro
     ```
 
 1. Configure your frontend environment:
@@ -68,7 +72,7 @@ The Craft [control panel](https://craftcms.com/docs/5.x/system/control-panel.htm
 
 ## Key Features
 
-This project includes basic support for a handful of Craft's best features, in a tidy headless package built on [Astro 5](https://astro.build).
+This project includes basic support for a handful of Craft's best features, in a tidy headless package built on [Astro 7](https://astro.build).
 
 ### GraphQL
 
@@ -93,9 +97,9 @@ There is no `.gitignore` at the root of the project—instead, each system maint
 
 ### Back End
 
-The `backend/` directory is predominantly a standard Craft installation, so [its structure](https://craftcms.com/docs/5.x/system/directory-structure.html) should be familiar. Craft is configured to run in [headless mode](https://craftcms.com/docs/5.x/reference/config/general.html#headlessmode), which means it doesn't perform any element routing, nor template rendering—in fact, it will only respond to _control panel_, _action_, and static asset requests (like any images you might upload).
+The `backend/` directory is a standard Craft 6 installation, which is a Laravel application, so its structure should be familiar. Craft is configured to run in [headless mode](https://craftcms.com/docs/5.x/reference/config/general.html#headlessmode), which means it doesn't perform any element routing, nor template rendering—in fact, it will only respond to _control panel_, _action_, and static asset requests (like any images you might upload).
 
-Craft uses the `PRIMARY_SITE_URL` environment variable to generate fully-qualified URLs for front-end pages (and assets), and `CRAFT_BASE_CP_URL` to build control panel URLs.
+Craft uses the `PRIMARY_SITE_URL` environment variable to generate fully-qualified URLs for front-end pages, and `APP_URL` for the control panel and assets. The GraphQL API is served at `/api` by `backend/routes/api.php`, without sessions or CSRF tokens, and `backend/config/cors.php` lets the front end call it from the browser. With DDEV, both URLs are set in `.ddev/config.yaml`, and DDEV creates `backend/.env` from `backend/.env.example` with the database connection when the project starts.
 
 ### Front End
 
@@ -119,13 +123,13 @@ If you want to compress the GraphQL query feedback loop, open up the Craft contr
 The DDEV configuration files shipped with this project use a specific pair of URLs for the Astro front end and Craft back end:
 
 - **Front end**: `https://starter-astro.ddev.site`
-- **Back end**: `https://api.starter-astro.ddev.com`
+- **Back end**: `https://api.starter-astro.ddev.site`
 
 If you would like to use different URLs, you must make a few changes in `.ddev/config.yaml`:
 
 - Update the `name` key (this influences the `starter-project` segment of the base URL);
 - Change the back-end hostname under the `additional_hostnames` key;
-- Change the `VIRTUAL_HOST` domains under `web_environment`;
+- Change the `VIRTUAL_HOST` domains and `PRIMARY_SITE_URL` under `web_environment`;
 
 Then, a change is required for each of the nginx configuration files:
 
@@ -134,11 +138,11 @@ Then, a change is required for each of the nginx configuration files:
 
 Astro also needs to be told what front-end URLs should look like:
 
-- Update `BASE_URL` in `frontend/.env`;
+- Update `BASE_URL` in `frontend/.env`, and `CRAFT_URL` and `PUBLIC_GQL_HOST` if the back-end URL changed;
 
 Finally, Craft may need to generate absolute URLs to the control panel in some scenarios:
 
-- Update `CRAFT_BASE_CP_URL` in `backend/.env`;
+- Update `APP_URL` in `.ddev/config.yaml` (or `backend/.env` outside DDEV);
 
 Your production configuration will probably look different—as long as Astro knows where the GraphQL endpoint lives (`PUBLIC_GQL_HOST` in `frontend/.env`) and both Craft and Astro know how to generate public URLs (`PRIMARY_SITE_URL` in `backend/.env` and `BASE_URL` in `frontend/.env`, respectively) these URLs don't need to be related in any specific way!
 
@@ -147,6 +151,6 @@ Your production configuration will probably look different—as long as Astro kn
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Thank you for considering contributing to this starter! It is generated by [Maestro](https://github.com/craftcms/maestro), which builds all of Craft's starter kits, so changes made directly in this repository are overwritten. Please make all contributions through Maestro.
 
 ## License
